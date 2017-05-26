@@ -2,12 +2,30 @@
 
 ## What does it do?
 
-It switches wireless sockets on/off when you connect/disconnect from the configured Chromecast.
+It switches wireless sockets on / off when you connect / disconnect from the configured Chromecast.
 
 ## Requirements:
 
-- send433 with sudo
+- Send433
+- Sudo (apt package)
 - RaspberryPI with a connected 433MHz transmitter
+
+## Installation:
+
+1. Install sudo:`apt-get install sudo`
+2. Build and install send433
+```
+git clone https://github.com/r10r/rcswitch-pi.git
+cd rcswitch-pi
+make all
+sudo mv send /usr/local/bin/send433
+# send433 needs to be owned by the root user
+sudo chown root:root /usr/local/bin/send433
+# send433 needs to be executed by the root user
+sudo chmod u+s /usr/local/bin/send433
+``` 
+
+3. Download the binary from [here](https://github.com/maxibanki/chromecast-socket-switcher/releases/download/v1.0.0/chromecast_linux_armv6.zip) or build it yourself with `go get ./...` and `go build` in the repository from here which you cloned before
 
 ## Command line flags:
 
@@ -18,30 +36,12 @@ It switches wireless sockets on/off when you connect/disconnect from the configu
 | sid | int | 4 | Socket ID |
 | debug| bool | false | Enable debug logging |
 
-## Installation:
-
-1. Install sudo:`apt-get install sudo`
-2. Build and install send433
-```
-cd 
-git clone https://github.com/r10r/rcswitch-pi.git
-cd rcswitch-pi
-make all
-sudo mv send /usr/local/bin/send433
-# send433 muss root gehören!
-sudo chown root:root /usr/local/bin/send433
-# send433 wird mit root Rechten ausgeführt!
-sudo chmod u+s /usr/local/bin/send433
-``` 
-
-3. build it with go `go build chromecast.go`
-
 ## Usage:
 
-`./chromecast -name=My Chromecast - scode=1000 -sid=2 --debug`
+`./chromecast -name=My Chromecast -scode=1000 -sid=2 --debug`
 
 ## Legal
 
-Thanks to [go-cast](https://github.com/barnybug/go-cast) for providing such a libary to control chromecast devices with golang.
+Thanks to [go-cast](https://github.com/barnybug/go-cast) for providing a libary to control chromecast devices with golang.
 
 Installation about send433 is from [here](https://github.com/mc-b/microHOME/wiki/Raspberrypi-433)
