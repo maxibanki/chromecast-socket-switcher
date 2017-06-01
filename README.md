@@ -17,8 +17,8 @@ Download the binary from [here](https://github.com/maxibanki/chromecast-socket-s
 | name | type | default value | description | 
 |----|----|----|----|
 | name | string | Iknabixam Audio | Name of your chromecast device |
-| scode| string | 10101 | Socket Code |
-| sid | string | 00010 | Socket ID in binary format |
+| SocketGroup| string | 10101 | Socket Group |
+| SocketDevice | string | 00010 | Socket Device in binary format |
 | debug| bool | false | Enable debug logging |
 
 ## Usage:

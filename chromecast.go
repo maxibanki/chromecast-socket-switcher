@@ -28,9 +28,9 @@ type lastSwitchData struct {
 }
 
 type configuration struct {
-	DeviceName string
-	SocketCode string
-	SocketID   string
+	DeviceName   string
+	SocketGroup  string
+	SocketDevice string
 }
 
 var (
@@ -40,8 +40,8 @@ var (
 
 func main() {
 	flag.StringVar(&config.DeviceName, "name", "Iknabixam Audio", "Name of your chromecast device")
-	flag.StringVar(&config.SocketCode, "scode", "10101", "Socket Code")
-	flag.StringVar(&config.SocketID, "sid", "00010", "Socket ID")
+	flag.StringVar(&config.SocketGroup, "sGroup", "10101", "Socket Group")
+	flag.StringVar(&config.SocketDevice, "sDevice", "00010", "Socket Device")
 	flag.BoolVar(&log.Debug, "debug", false, "Enable debug logging")
 	flag.Parse()
 
@@ -150,11 +150,11 @@ func toggleSocket(mode bool) {
 func toggleSwitchDirectly(mode bool) {
 	log.Printf("Switching the sockets: %t", mode)
 	if mode {
-		if err := lastSwitch.rcSwitch.SwitchOn("", config.SocketCode, config.SocketID); err != nil {
+		if err := lastSwitch.rcSwitch.SwitchOn("", config.SocketGroup, config.SocketDevice); err != nil {
 			log.Errorln(err)
 		}
 	} else {
-		if err := lastSwitch.rcSwitch.SwitchOff("", config.SocketCode, config.SocketID); err != nil {
+		if err := lastSwitch.rcSwitch.SwitchOff("", config.SocketGroup, config.SocketDevice); err != nil {
 			log.Errorln(err)
 		}
 	}
