@@ -3,33 +3,34 @@ package main
 import (
 	"context"
 	"os"
-	"os/exec"
-	"strings"
 	"time"
+
+	"periph.io/x/periph/conn/gpio/gpioreg"
+	"periph.io/x/periph/host"
 
 	"flag"
 
 	"encoding/json"
-
-	"strconv"
 
 	cast "github.com/barnybug/go-cast"
 	"github.com/barnybug/go-cast/controllers"
 	"github.com/barnybug/go-cast/discovery"
 	"github.com/barnybug/go-cast/events"
 	"github.com/barnybug/go-cast/log"
+	"github.com/rck/rcswitch"
 )
 
 type lastSwitchData struct {
 	Time        time.Time
 	Mode        bool
 	LastConnect time.Time
+	rcSwitch    *rcswitch.RCSwitch
 }
 
 type configuration struct {
 	DeviceName string
-	SocketCode int
-	SocketID   int
+	SocketCode string
+	SocketID   string
 }
 
 var (
@@ -39,15 +40,22 @@ var (
 
 func main() {
 	flag.StringVar(&config.DeviceName, "name", "Iknabixam Audio", "Name of your chromecast device")
-	flag.IntVar(&config.SocketCode, "scode", 10101, "Socket Code")
-	flag.IntVar(&config.SocketID, "sid", 4, "Socket ID")
+	flag.StringVar(&config.SocketCode, "scode", "10101", "Socket Code")
+	flag.StringVar(&config.SocketID, "sid", "00010", "Socket ID")
 	flag.BoolVar(&log.Debug, "debug", false, "Enable debug logging")
 	flag.Parse()
+
 	dbg, _ := json.Marshal(config)
 	log.Printf("Using configuration: %s\n", string(dbg))
+
+	if _, err := host.Init(); err != nil {
+		log.Errorln(err)
+	}
+	lastSwitch.rcSwitch = rcswitch.NewRCSwitch(gpioreg.ByNumber(17))
+
 Connect:
 	for {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(15*time.Second))
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(15*time.Minute))
 		client := connect(ctx)
 		cancel()
 
@@ -139,14 +147,15 @@ func toggleSocket(mode bool) {
 	toggleSwitchDirectly(mode)
 }
 
-func toggleSwitchDirectly(modeBool bool) {
-	modeString := "0"
-	if modeBool {
-		modeString = "1"
+func toggleSwitchDirectly(mode bool) {
+	log.Printf("Switching the sockets: %t", mode)
+	if mode {
+		if err := lastSwitch.rcSwitch.SwitchOn("", config.SocketCode, config.SocketID); err != nil {
+			log.Errorln(err)
+		}
+	} else {
+		if err := lastSwitch.rcSwitch.SwitchOff("", config.SocketCode, config.SocketID); err != nil {
+			log.Errorln(err)
+		}
 	}
-	out, err := exec.Command("sudo", "send433", strconv.Itoa(config.SocketCode), strconv.Itoa(config.SocketID), modeString).Output()
-	if err != nil {
-		log.Errorln(err)
-	}
-	log.Printf("Output of send433: %s\n", strings.TrimSpace(string(out)))
 }
